@@ -1,0 +1,18 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: auto-project-tag
+spec:
+  rules:
+  - name: add-project-tag
+    match:
+      any:
+      - resources:
+          kinds:
+          - Namespace # Or other resource types like Pod, Deployment, etc.
+    mutate:
+      patchStrategicMerge:
+        metadata:
+          labels:
+            project: "{{request.object.metadata.name}}" # Use the namespace name as project tag
+

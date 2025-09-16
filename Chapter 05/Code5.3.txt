@@ -1,0 +1,35 @@
+# Define allowed image registries
+allowed_registries := {
+    "docker.io",
+    "gcr.io",
+    "quay.io",
+    "your-private-registry.com"
+}
+
+# Define maximum allowed vulnerability severity
+allowed_severity := ["LOW", "MEDIUM"]
+
+# Check if the image registry is trusted
+deny[msg] {
+    image := input.review.object.spec.containers[_].image
+    not is_trusted_registry(image)
+    msg := sprintf("Image %s is not from an allowed registry", [image])
+}
+
+is_trusted_registry(image) {
+    some registry
+    registry := split(image, "/")[0]
+    registry == allowed_registries[_]
+}
+
+# Enforce vulnerability scanning results
+deny[msg] {
+    vuln := input.review.object.metadata.annotations["vulnerability.severity"]
+    not is_allowed_severity(vuln)
+    msg := sprintf("Image contains vulnerabilities with severity: %s", [vuln])
+}
+
+is_allowed_severity(severity) {
+    severity == allowed_severity[_]
+}
+

@@ -1,0 +1,13 @@
+# observability/Prometheus-alerts.yaml
+groups:
+- name: security-alerts
+rules:
+- alert: ExcessiveFailedLogins
+expr: rate(aws_cloudtrail_failed_login_events_total[5m]) > 5
+    for: 10m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Potential brute-force attack detected"
+      description: "More than 5 failed logins per minute over 10 minutes."
+

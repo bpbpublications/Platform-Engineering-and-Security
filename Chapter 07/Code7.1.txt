@@ -1,0 +1,29 @@
+pipeline {
+    agent any
+    stages {
+        stage('Build') {
+            steps {
+                script {
+                    // Build the application
+                    sh 'mvn clean install'
+                }
+            }
+        }
+ stage('Static Code Analysis') {
+            steps {
+                script {
+                    // Run static code analysis
+                    sh ‘sast-cli scanner’
+                }
+            }
+        }
+        stage('Dependency Check') {
+            steps {
+                script {
+                    //Run Dependency Check
+                    sh 'dependency-check'
+                }
+            }
+        }
+}
+

@@ -1,0 +1,9 @@
+# Add this step to the CI/CD pipeline above
+- name: Snyk Security Scan
+  uses: snyk/actions/python@v3
+  with:
+    command: test
+    args: --severity-threshold=high
+  env:
+    SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+

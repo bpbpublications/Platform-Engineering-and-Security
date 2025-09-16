@@ -1,0 +1,16 @@
+# checkov --framework terraform_plan -f terraform.plan
+# Sample Checkov policy (YAML)
+# compliance/checkov-policy.yaml
+metadata:
+name: "S3 Bucket Encryption Enforcement"
+ id: "CKV_AWS_19"
+category: "ENCRYPTION"
+scope:
+provider: "aws"
+  resource_type: "aws_s3_bucket"
+definition:
+  cond_type: "attribute"
+  resource_types: ["aws_s3_bucket"]
+  attribute: "server_side_encryption_configuration"
+  operator: "not_empty"
+

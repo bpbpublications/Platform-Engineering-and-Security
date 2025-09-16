@@ -1,0 +1,36 @@
+# deployment.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: xac-user-management-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: xac-ums
+  template:
+    metadata:
+      labels:
+        app: xac-ums
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.25
+        ports:
+        - containerPort: 80
+---
+# service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: xac-ums-service
+spec:
+  selector:
+    app: xac-ums
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: LoadBalancer
+

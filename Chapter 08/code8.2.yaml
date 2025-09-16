@@ -1,0 +1,18 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: add-cost-center-tag
+spec:
+  rules:
+    - name: add-cost-center
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      mutate:
+        patchStrategicMerge:
+          metadata:
+            labels:
+              cost-center: "{{request.object.metadata.namespace}}" # Or a lookup based on namespace
+

@@ -1,0 +1,8 @@
+
+resource "aws_s3_bucket" "data-bucket" {
+  bucket = "data-tofu-bucket"
+  tags = {
+  Name  = "Data bucket"
+  }
+}
+

@@ -1,0 +1,66 @@
+pipelineJob('Security-Scanning-Pipeline') {
+    definition {
+        cps {
+            script('''
+                pipeline {
+                    agent any
+                    environment {
+                        SONAR_TOKEN = credentials('sonar-token')
+                        JFROG_USER = credentials('jfrog-user')
+                        JFROG_PASS = credentials('jfrog-pass')
+                        JFROG_URL = 'https://your.jfrog.io/artifactory'
+                        ZAP_DOCKER_IMAGE = 'owasp/zap2docker-stable'
+                    }
+                    stages {
+                        stage('Checkout Code') {
+                            steps {
+                                checkout scm
+                            }
+                        }
+
+                        stage('Gitleaks - Secrets Detection') {
+                            steps {
+                                sh 'gitleaks detect --source . --verbose --redact'
+                            }
+                        }
+
+                        stage('SonarQube Analysis') {
+                            steps {
+                                withSonarQubeEnv('SonarQube') {
+                                    sh 'sonar-scanner -Dsonar.projectKey=my-project -Dsonar.sources=.'
+                                }
+                            }
+                        }
+
+                        stage('JFrog Xray Scan') {
+                            steps {
+                                sh "jfrog rt scan my-repo/ --user=${JFROG_USER} --password=${JFROG_PASS}"
+                            }
+                        }
+
+                        stage('Anchore Image Scan') {
+                            steps {
+                                sh 'anchore-cli image add myimage:latest'
+                                sh 'anchore-cli image wait myimage:latest'
+                                sh 'anchore-cli image vuln myimage:latest all'
+                            }
+                        }
+
+                        stage('Checkov - Terraform & Kubernetes IaC Scanning') {
+                            steps {
+                                sh 'checkov -d .'
+                            }
+                        }
+
+                        stage('ZAP DAST Scan') {
+                            steps {
+                                sh 'docker run -v $(pwd):/zap/wrk -t ${ZAP_DOCKER_IMAGE} zap-baseline.py -t http://yourapp.com -g gen.conf -r zap_report.html'
+                            }
+                        }
+                    }
+                }
+            ''')
+        }
+    }
+}
+

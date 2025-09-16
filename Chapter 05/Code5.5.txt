@@ -1,0 +1,37 @@
+# InSpec Profile: Image Validation for Kubernetes
+title 'Kubernetes Image Security Compliance'
+
+control 'trusted-image-registry' do
+  impact 1.0
+  title 'Ensure container images come from trusted registries'
+  desc 'Only allow images from approved registries like docker.io, gcr.io, quay.io, and private registries.'
+
+  allowed_registries = ['docker.io', 'gcr.io', 'quay.io', 'your-private-registry.com']
+
+  kubernetes_pods.namespace('default').items.each do |pod|
+    pod.containers.each do |container|
+      registry = container.image.split('/')[0]
+      describe registry do
+        it { should be_in allowed_registries }
+      end
+    end
+  end
+end
+
+control 'block-high-severity-vulnerabilities' do
+  impact 1.0
+  title 'Deny images with HIGH or CRITICAL vulnerabilities'
+  desc 'Ensure that deployed container images do not have vulnerabilities with HIGH or CRITICAL severity.'
+
+  disallowed_severities = ['HIGH', 'CRITICAL']
+
+  kubernetes_pods.namespace('default').items.each do |pod|
+    vuln_annotation = pod.metadata.annotations['vulnerability.severity']
+    next unless vuln_annotation # Skip if annotation is missing
+
+    describe vuln_annotation do
+      it { should_not be_in disallowed_severities }
+    end
+  end
+end
+
