@@ -1,2 +1,2 @@
-# Platform Engineering Secure Software Delivery Platform
-Platform Engineering, Secure Software Delivery Platform, by BPB Publications
+# Platform Engineering and Security
+Platform Engineering and Security, by BPB Publications
